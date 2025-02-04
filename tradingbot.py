@@ -14,7 +14,7 @@ ALPACA_CREDS = {
     "PAPER": True
 }
 
-class MLTrader(Strategy):
+class Prometheus(Strategy):
     def initialize (self, symbol:str="SPY"):
         self.symbol = symbol
         self.sleeptime = "12H"
@@ -27,11 +27,11 @@ class MLTrader(Strategy):
             self.last_trade = "buy"
 
 start_date = datetime(2022,12,15)
-end_date = datetime(2022,12,20)
+end_date = datetime(2024,12,20)
 
 broker = Alpaca(ALPACA_CREDS)
 
-strategy = MLTrader(name='mls', broker = broker, parameters = {"symbol": "SPY"})
+strategy = Prometheus(name='mls', broker = broker, parameters = {"symbol": "NVDA"})
 
 strategy.backtest(
     YahooDataBacktesting,
