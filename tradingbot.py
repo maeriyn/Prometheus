@@ -15,23 +15,37 @@ ALPACA_CREDS = {
 }
 
 class Prometheus(Strategy):
-    def initialize (self, symbol:str="SPY"):
+    def initialize (self, symbol:str="SPY", cash_at_risk:float=.5):
         self.symbol = symbol
         self.sleeptime = "12H"
         self.last_trade = None
+        self.cash_at_risk = cash_at_risk
+
+    def position_sizing(self):
+        cash = self.get_cash()
+        last_price = self.get_last_price(self.symbol)
+        quantity = round(cash * self.cash_at_risk / last_price, 0)
+        return cash, last_price, quantity
 
     def on_trading_iteration(self):
-        if self.last_trade == None:
-            order = self.create_order(self.symbol, 10, "buy", type = "market")
-            self.submit_order(order)
-            self.last_trade = "buy"
+        cash, last_price, quantity = self.position_sizing()
 
-start_date = datetime(2022,12,15)
+        if cash > last_price:
+            if self.last_trade == None:
+                order = self.create_order(
+                    self.symbol, quantity, "buy", 
+                    type = "bracket",
+                    take_profit_price = last_price*1.075,
+                    stop_loss_price = last_price*.95)
+                self.submit_order(order)
+                self.last_trade = "buy"
+
+start_date = datetime(2024,6,15)
 end_date = datetime(2024,12,20)
 
 broker = Alpaca(ALPACA_CREDS)
 
-strategy = Prometheus(name='mls', broker = broker, parameters = {"symbol": "NVDA"})
+strategy = Prometheus(name='mls', broker = broker, parameters = {"symbol": "NVDA", "cash_at_risk": .5})
 
 strategy.backtest(
     YahooDataBacktesting,
