@@ -1,0 +1,5 @@
+time,strategy,identifier,symbol,side,type,status,multiplier,time_in_force,asset.strike,asset.multiplier,asset.asset_type,price,filled_quantity,trade_cost
+2023-11-15 09:30:00-05:00,Prometheus,96805a3049e64dbfb55ef93d1ee6e5d8,SPY,buy,market,new,1,gtc,0.0,1,stock,,,
+2023-11-15 09:30:00-05:00,Prometheus,96805a3049e64dbfb55ef93d1ee6e5d8,SPY,buy,market,fill,1,gtc,0.0,1,stock,450.1099853515625,111.0,0.0
+2024-01-22 08:30:00-05:00,Prometheus,5c85129d162840beb451ed84cd944140,SPY,sell,stop,canceled,1,day,0.0,1,stock,,,
+2024-01-22 08:30:00-05:00,Prometheus,60f4686eecee4a5ca11be95159b5b658,SPY,sell,limit,fill,1,day,0.0,1,stock,484.010009765625,111.0,0.0
