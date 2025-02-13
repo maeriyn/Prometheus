@@ -5,6 +5,7 @@ from lumibot.traders import Trader
 from datetime import datetime
 from alpaca_trade_api.rest import REST
 from timedelta import Timedelta
+from finbert import estimate_sentiment
 
 API_KEY = "PKLYMJV11F3OGLU7OFBY"
 API_SECRET = "krjSQsiCplG0AznPkwGC321KK1AhwMfCSyTw7gZS" 
@@ -35,26 +36,45 @@ class Prometheus(Strategy):
         three_days_ago = today - Timedelta(days = 3)
         return today.strftime('%Y-%m-%d'), three_days_ago.strftime('%Y-%m-%d')
 
-    def get_news (self):
+    def get_sentiment (self):
         today, three_days_ago = self.get_dates()
         news = self.api.get_news(symbol = self.symbol, start = three_days_ago, end = today)
         news = [ev.__dict__["_raw"]["headline"] for ev in news]
-        return news
+        probability, sentiment = estimate_sentiment(news)
+        return probability, sentiment 
+
 
     def on_trading_iteration(self):
-        cash, last_price, quantity = self.position_sizing()
+        cash, last_price, quantity = self.position_sizing() 
+        probability, sentiment = self.get_sentiment()
 
-        if cash > last_price:
-            if self.last_trade == None:
-                news = self.get_news()
-                print(news)
+        if cash > last_price: 
+            if sentiment == "positive" and probability > .995: 
+                if self.last_trade == "sell": 
+                    self.sell_all() 
                 order = self.create_order(
-                    self.symbol, quantity, "buy", 
-                    type = "bracket",
-                    take_profit_price = last_price*1.075,
-                    stop_loss_price = last_price*.95)
-                self.submit_order(order)
+                    self.symbol, 
+                    quantity, 
+                    "buy", 
+                    type="bracket", 
+                    take_profit_price=last_price*1.20, 
+                    stop_loss_price=last_price*.95
+                )
+                self.submit_order(order) 
                 self.last_trade = "buy"
+            elif sentiment == "negative" and probability > .999: 
+                if self.last_trade == "buy": 
+                    self.sell_all() 
+                order = self.create_order(
+                    self.symbol, 
+                    quantity, 
+                    "sell", 
+                    type="bracket", 
+                    take_profit_price=last_price*.8, 
+                    stop_loss_price=last_price*1.05
+                )
+                self.submit_order(order) 
+                self.last_trade = "sell"
 
 start_date = datetime(2023,11,15)
 end_date = datetime(2024,12,20)
