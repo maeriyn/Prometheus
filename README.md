@@ -1,2 +1,3 @@
 # Prometheus
-# By Martin (Jiacheng) Pan - started on 2/3/2025
+# Started on 2/3/2025
+# Collaborators: Martin Pan, Derek Cho
